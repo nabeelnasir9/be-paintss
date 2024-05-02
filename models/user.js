@@ -5,12 +5,9 @@ const userSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  otp: { type: String },
-  verified: { type: Boolean },
   selectedImages: { type: Array },
   orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Order" }],
   orderedImages: { type: Array },
-  otp_expiry: { type: Date },
 });
 
 userSchema.pre("save", async function (next) {
