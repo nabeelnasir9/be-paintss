@@ -184,41 +184,6 @@ router.post("/payment", async (req, res) => {
   }
 });
 
-// router.get("/sessionid", async (req, res) => {
-//   try {
-//     const session = await stripe.checkout.sessions.retrieve(
-//       "cs_test_a1BX7s0kj2b0XFEPikuwNBfdApTDYdFKgh2gcIDZvgUgVpmi5YZBP82tBG",
-//     );
-//     res.json(session);
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
-
-// router.post("/payment2", async (req, res) => {
-//   const { images } = req.body;
-//   const lineItems = images.map((index) => ({
-//     price_data: {
-//       currency: "usd",
-//       product_data: {
-//         name: "Tarot Cards",
-//         images: [index],
-//       },
-//       unit_amount: 6000,
-//     },
-//     quantity: "1",
-//   }));
-//   const session = await stripe.checkout.sessions.create({
-//     payment_method_types: ["card"],
-//     line_items: lineItems,
-//     mode: "payment",
-//     success_url: "http://localhost:8000/success",
-//     cancel_url: "http://localhost:8000/cancel",
-//   });
-//   console.log(session.customer);
-//   res.json({ id: session.id, url: session.url });
-// });
-
 router.get("/orders", async (req, res) => {
   const { userEmail } = req.query;
   try {
