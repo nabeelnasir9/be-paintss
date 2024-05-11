@@ -66,6 +66,9 @@ router.get("/all-orders", async (_req, res) => {
   }
 });
 
+/**
+ * @classdesc [INFO: Update Status of Order]
+ */
 router.post("/update-status", async (req, res) => {
   try {
     const { orderId, deliveryStatus } = req.body;
@@ -82,6 +85,18 @@ router.post("/update-status", async (req, res) => {
   } catch (error) {
     console.error("Error updating delivery status:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+router.get("/order-noti", async (_req, res) => {
+  try {
+    const allOrders = await Order.find();
+    res.status(200).json(allOrders.length);
+  } catch (error) {
+    console.error("Error retrieving prompts:", error);
+    res
+      .status(500)
+      .json({ message: "Error retrieving prompts from the database" });
   }
 });
 

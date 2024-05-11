@@ -103,10 +103,16 @@ router.post("/cart", async (req, res) => {
   try {
     const { email } = req.body;
     let user = await User.findOne({ email });
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
     const selectedImages = user.selectedImages;
+    if (selectedImages.length === 0) {
+      return res.status(200).json({ message: "Cart is empty", images: [] });
+    }
+
     return res
       .status(200)
       .json({ message: "User found", images: selectedImages });
@@ -114,7 +120,34 @@ router.post("/cart", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+router.post("/cart-delete", async (req, res) => {
+  try {
+    const { email, id } = req.body;
+    let user = await User.findOne({ email });
 
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    let selectedImages = user.selectedImages;
+    const index = selectedImages.indexOf(id);
+    if (index === -1) {
+      return res
+        .status(404)
+        .json({ error: "Image not found in the user's cart" });
+    }
+
+    selectedImages.splice(index, 1);
+
+    user.selectedImages = selectedImages;
+    await user.save();
+
+    return res.status(200).json({ message: "Image removed successfully!" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Server error" });
+  }
+});
 router.post("/check", async (req, res) => {
   try {
     const { email, image } = req.body;
@@ -138,12 +171,11 @@ router.post("/check", async (req, res) => {
 
 router.post("/payment", async (req, res) => {
   const { images, userEmail } = req.body;
-
   const lineItems = images.map((index) => ({
     price_data: {
       currency: "usd",
       product_data: {
-        name: "Tarot Card",
+        name: "Generative Images",
         images: [index],
       },
       unit_amount: 6000,
@@ -156,7 +188,6 @@ router.post("/payment", async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    console.log(process.env.ORIGIN);
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: lineItems,
