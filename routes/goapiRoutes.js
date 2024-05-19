@@ -221,7 +221,9 @@ router.post("/imgtoimg", async (req, res) => {
 
     const prompts = [];
     for (let i = 0; i < body.images; i++) {
-      const prompt = `${body.imgUrl} change it into ${body.style} style and try to be as accurate to the style as possible. Subject is facing the camera. --ar ${body.dimensions} --style raw`;
+      const prompt = `${body.imgUrl} change it into ${body.style} style and try to be as accurate to the style as possible. Subject is facing the camera. --ar ${body.dimensions} --style raw --iw 1`;
+      // const prompt = `${body.imgUrl} Subject is facing the camera.The style of image is ${body.style} with strong emphasis on the ${body.style} Aesthetic . --sref https://i.ibb.co/3199ksy/belle-beauty-and-the-beast-by-mari945-d94gx6c-375w-2x.jpg --ar ${body.dimensions} --style raw --iw 1`;
+
       console.log(prompt);
       prompts.push(prompt);
     }
