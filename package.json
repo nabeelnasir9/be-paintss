@@ -24,6 +24,7 @@
     "nodemailer": "^6.9.13",
     "openai": "^4.40.2",
     "otp-generator": "^4.0.1",
-    "stripe": "^15.2.0"
+    "stripe": "^15.2.0",
+    "uuid": "^9.0.1"
   }
 }
