@@ -6,30 +6,29 @@ require("dotenv").config();
 
 const stripe = Stripe(process.env.STRIPE_KEY);
 const router = express.Router();
-router.get("/all-users", async (_req, res) => {
+
+router.get("/all-orders", async (_req, res) => {
   try {
-    const users = await User.find().populate("orders");
-    for (const user of users) {
-      for (const order of user.orders) {
-        try {
-          const session = await stripe.checkout.sessions.retrieve(
-            order.sessionId,
-          );
-          order.shipping = session;
-          await order.save();
-        } catch (error) {
-          console.error("Error retrieving session:", error.message);
-        }
+    const orders = await Order.find();
+    for (const order of orders) {
+      try {
+        const session = await stripe.checkout.sessions.retrieve(
+          order.sessionId,
+        );
+        order.shipping = session;
+        await order.save();
+      } catch (error) {
+        console.error("Error retrieving session:", error.message);
       }
     }
-    res.json(users);
+    res.json(orders);
   } catch (error) {
     console.error(error.message);
     res.status(500).send("Server error");
   }
 });
 
-router.get("/all-orders", async (_req, res) => {
+router.get("/orderInfo", async (_req, res) => {
   try {
     const orders = await Order.find();
     let totalAmount = 0;
