@@ -3,6 +3,18 @@ const axios = require("axios");
 const router = express.Router();
 const token = process.env.X_API_KEY || null;
 
+const convertDimensions = (dimensions) => {
+  if (dimensions === "8:11") {
+    return "Small";
+  }
+  if (dimensions === "15:19") {
+    return "Medium";
+  }
+  if (dimensions === "1:2") {
+    return "Large";
+  }
+};
+
 async function CheckProgress(reqid) {
   return new Promise((resolve, reject) => {
     const url = "https://api.midjourneyapi.xyz/mj/v2/fetch";
@@ -33,6 +45,7 @@ router.post("/imgtoimg", async (req, res) => {
           const editResult = await generateImage(prompt);
           const upscaleResult = await upscaleImage(editResult.task_id);
           imageRequests.push({
+            size: convertDimensions(body.dimensions),
             status: upscaleResult.status,
             task_id: upscaleResult.task_id,
             uri: upscaleResult.task_result.image_url,
@@ -112,6 +125,7 @@ router.post("/multi", async (req, res) => {
           const editResult = await generateImage(prompt);
           const upscaleResult = await upscaleImage(editResult.task_id);
           imageRequests.push({
+            size: convertDimensions(body.dimensions),
             status: upscaleResult.status,
             task_id: upscaleResult.task_id,
             uri: upscaleResult.task_result.image_url,
