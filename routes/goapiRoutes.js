@@ -1,37 +1,9 @@
 const express = require("express");
 const axios = require("axios");
+const CheckProgress = require("../utils/CheckProgress");
+const convertDimensions = require("../utils/convertDimensions");
 const router = express.Router();
 const token = process.env.X_API_KEY || null;
-
-const convertDimensions = (dimensions) => {
-  if (dimensions === "8:11") {
-    return "Small";
-  }
-  if (dimensions === "15:19") {
-    return "Medium";
-  }
-  if (dimensions === "1:2") {
-    return "Large";
-  }
-};
-
-async function CheckProgress(reqid) {
-  return new Promise((resolve, reject) => {
-    const url = "https://api.midjourneyapi.xyz/mj/v2/fetch";
-    const interval = setInterval(async () => {
-      try {
-        const rq = await axios.post(url, { task_id: reqid });
-        if (rq.data.status === "finished") {
-          clearInterval(interval);
-          resolve(rq.data);
-        }
-      } catch (error) {
-        clearInterval(interval);
-        reject(error);
-      }
-    }, 3000);
-  });
-}
 
 router.post("/imgtoimg", async (req, res) => {
   try {

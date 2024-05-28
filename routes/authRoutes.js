@@ -1,13 +1,15 @@
 const express = require("express");
+const User = require("../models/user");
 const Order = require("../models/order");
+const generateCouponCode = require("../utils/generateCouponCode");
 const Coupon = require("../models/coupon");
 const MysteryImage = require("../models/mysteryimage");
 const Stripe = require("stripe");
 const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
-
 const stripe = Stripe(process.env.STRIPE_KEY);
 const router = express.Router();
+
 
 router.post("/payment", async (req, res) => {
   const { images, price, couponCode } = req.body;
@@ -75,6 +77,53 @@ router.get("/order/:trackingId", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch order" });
   }
 });
+
+
+router.post("/popup-generate", async (req, res) => {
+  const { email, name, phone } = req.body;
+  console.log(req.body);
+
+  if (!email || !name) {
+    return res.status(400).json({ error: "Email and name are required" });
+  }
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // Check if the user already has any coupon codes
+      if (user.couponCode && user.couponCode.length > 0) {
+        return res.status(400).json({ error: "Discount has already been availed" });
+      }
+    }
+
+    // Generate a new coupon code
+    const discount = phone ? 20 : 15;
+    const code = generateCouponCode(discount, 2);
+    const newCoupon = new Coupon({ code, discount });
+    const savedCoupon = await newCoupon.save();
+
+    // Create a new user if they do not exist, or update the existing user
+    if (!user) {
+      user = new User({ email, name, phone, couponCode: [savedCoupon._id] });
+    } else {
+      if (phone && !user.phone) {
+        user.phone = phone;
+      }
+      user.couponCode.push(savedCoupon._id);
+    }
+
+    await user.save();
+
+    res.status(201).json({ message: "Coupon generated successfully", code, discount });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+;
+
+
+
 router.post("/generate", async (req, res) => {
   const { code, discount } = req.body;
   const newCoupon = new Coupon({ code, discount });
@@ -101,7 +150,7 @@ router.post("/validate", async (req, res) => {
   }
 });
 
-router.get("/random", async (req, res) => {
+router.get("/random", async (_req, res) => {
   try {
     const count = await MysteryImage.countDocuments();
     const random = Math.floor(Math.random() * count);
