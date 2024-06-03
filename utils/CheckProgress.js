@@ -1,3 +1,5 @@
+const axios = require("axios");
+
 async function CheckProgress(reqid) {
   return new Promise((resolve, reject) => {
     const url = "https://api.midjourneyapi.xyz/mj/v2/fetch";
