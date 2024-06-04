@@ -89,7 +89,6 @@ router.post("/multi", async (req, res) => {
   try {
     const body = req.body;
     console.log(body);
-
     const generateAndUpscale = async (prompts) => {
       const imageRequests = [];
       await Promise.all(

@@ -10,27 +10,28 @@ require("dotenv").config();
 const stripe = Stripe(process.env.STRIPE_KEY);
 const router = express.Router();
 
-
 router.post("/payment", async (req, res) => {
   const { images, price, couponCode } = req.body;
-  const lineItems = {
-    price_data: {
-      currency: "usd",
-      product_data: {
-        name: "Generative Images",
-        images: images.map((image) => image.uri),
+  const lineItems = [
+    {
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: "Generative Images",
+          images: images.map((image) => image.uri),
+        },
+        unit_amount: price,
       },
-      unit_amount: price,
+      quantity: 1,
     },
-    quantity: "1",
-  };
+  ];
 
   try {
     const trackingId = uuidv4();
     const successUrl = `${process.env.ORIGIN}/success?trackingId=${trackingId}`;
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      line_items: [lineItems],
+      line_items: lineItems,
       mode: "payment",
       shipping_address_collection: {
         allowed_countries: ["IN", "US", "CA"],
@@ -41,6 +42,15 @@ router.post("/payment", async (req, res) => {
 
     const order = new Order({
       trackingId: trackingId,
+      images: images.map((image) => ({
+        uri: image.uri,
+        size: image.size,
+        frame: {
+          style: image.frame.style,
+          selected: image.frame.selected,
+        },
+        quality: image.quality,
+      })),
       sessionId: session.id,
       lineItems: lineItems,
       delivery_status: "Expected",
@@ -78,7 +88,6 @@ router.get("/order/:trackingId", async (req, res) => {
   }
 });
 
-
 router.post("/popup-generate", async (req, res) => {
   const { email, name, phone } = req.body;
   console.log(req.body);
@@ -93,7 +102,9 @@ router.post("/popup-generate", async (req, res) => {
     if (user) {
       // Check if the user already has any coupon codes
       if (user.couponCode && user.couponCode.length > 0) {
-        return res.status(400).json({ error: "Discount has already been availed" });
+        return res
+          .status(400)
+          .json({ error: "Discount has already been availed" });
       }
     }
 
@@ -115,15 +126,13 @@ router.post("/popup-generate", async (req, res) => {
 
     await user.save();
 
-    res.status(201).json({ message: "Coupon generated successfully", code, discount });
+    res
+      .status(201)
+      .json({ message: "Coupon generated successfully", code, discount });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
-;
-
-
-
 router.post("/generate", async (req, res) => {
   const { code, discount } = req.body;
   const newCoupon = new Coupon({ code, discount });
