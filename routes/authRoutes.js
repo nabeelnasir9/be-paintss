@@ -11,7 +11,7 @@ const stripe = Stripe(process.env.STRIPE_KEY);
 const router = express.Router();
 
 router.post("/payment", async (req, res) => {
-  const { images, price, couponCode } = req.body;
+  const { images, price, couponCode, mysteryPaintKit } = req.body;
   const lineItems = [
     {
       price_data: {
@@ -42,6 +42,7 @@ router.post("/payment", async (req, res) => {
 
     const order = new Order({
       trackingId: trackingId,
+      mysteryPaintKit: mysteryPaintKit,
       images: images.map((image) => ({
         uri: image.uri,
         size: image.size,

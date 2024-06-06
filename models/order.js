@@ -13,6 +13,7 @@ const imageSchema = new mongoose.Schema({
 
 const orderSchema = new mongoose.Schema({
   trackingId: { type: String, required: true },
+  mysteryPaintKit: { type: String },
   images: [imageSchema],
   sessionId: { type: String, required: true },
   lineItems: { type: Object, required: true }, // Keep it simple as it’s managed by Stripe
