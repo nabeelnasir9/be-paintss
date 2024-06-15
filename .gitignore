@@ -1,3 +1,4 @@
 samples
 requests
 node_modules
+.env
